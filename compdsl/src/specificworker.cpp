@@ -31,13 +31,11 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 */
 SpecificWorker::~SpecificWorker()
 {
-	
+    
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-
-
 
 	
 	timer.start(Period);
@@ -49,19 +47,28 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 void SpecificWorker::compute()
 {
 
-const float threshold = 200; //millimeters
+const float threshold = 415; //millimeters, distancia con obstaculos
     float rot = 0.6;  //rads per second
 
     try
     {
         RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
-        std::sort( ldata.begin()+5, ldata.end()-5, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return     a.dist < b.dist; }) ;  //sort laser data from small to large distances using a lambda function.
+        std::sort( ldata.begin()+5, ldata.end()-5, [](RoboCompLaser::TData a, RoboCompLaser::TData b)
+	{ 
+	  return     a.dist < b.dist; 
+	  
+	}) ;  //sort laser data from small to large distances using a lambda function.
 
-    if( ldata[5].dist < threshold)
+    if( ldata[5].dist < threshold) //
     {
         std::cout << ldata.front().dist << std::endl;
-        differentialrobot_proxy->setSpeedBase(5, rot);
-        usleep(rand()%(1500000-100000 + 1) + 100000);  //random wait between 1.5s and 0.1sec
+	
+	if(ldata[5].angle < 0)
+	  differentialrobot_proxy->setSpeedBase(5, rot); // velocidad de rotacion
+	else
+	  differentialrobot_proxy->setSpeedBase(5, -rot);
+	
+        usleep(rand()%(1500000-100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec, espera antes de girar
     }
     else
     {
