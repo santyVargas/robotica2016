@@ -30,7 +30,7 @@
 
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
-
+#include <qmat/QMatAll>
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
@@ -39,7 +39,7 @@ class SpecificWorker : public GenericWorker
 {
   
  
- struct target{
+ struct Target{
   
   bool active=false;
   mutable QMutex m;
@@ -54,14 +54,22 @@ class SpecificWorker : public GenericWorker
   
   void copy(float x, float z){
     
-    QMutex ml(&m); 
+    QMutexLocker ml(&m); 
+    pose.resize(2);
     pose[0]=x;
     pose[1]=z;
   }
   
+  bool isActive()
+  {
+    QMutexLocker ml(&m); 
+    
+    return  active;
+  }
+  
   QVec getPose(){
-  	QMutex ml(&m); 
-  	return  pose;
+    QMutexLocker ml(&m); 
+    return  pose;
   }
   
  };
@@ -74,14 +82,14 @@ public:
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	
-	void setPick(const Pick  &myPick);
+	void setPick(const Pick &myPick);
 
 
 public slots:
 	void compute(); 	
 
 private:
-	
+	Target target;
 };
 
 #endif

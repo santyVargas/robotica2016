@@ -43,14 +43,18 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-
+  if(target.isActive())
+  {
+   qDebug()<<"hola"; 
+   target.setActive(false);
+  }
   /*
    * if(target.copy...)
    * 
    * 
    **/
   
-  
+/*  
 const float threshold = 415; //millimeters, distancia con obstaculos
     float rot = 0.6;  //rads per second
 
@@ -82,7 +86,7 @@ const float threshold = 415; //millimeters, distancia con obstaculos
     catch(const Ice::Exception &ex)
     {
         std::cout << ex << std::endl;
-    }
+    }*/
     
     //  direc..->getBaseState(bState);
     //  x
@@ -93,9 +97,10 @@ const float threshold = 415; //millimeters, distancia con obstaculos
 
 void SpecificWorker::setPick(const Pick &myPick){
 
-  qDebug()<<"usando myPick";
-  
-  
+  qDebug()<<"usando myPick: x = "<<myPick.x<<", y = "<<myPick.y<<", z = "<<myPick.z;
+  target.copy(myPick.x, myPick.z);
+  target.setActive(true);
+  //differentialrobot_proxy->setSpeedBase(50,0);
 }
 
 /*
