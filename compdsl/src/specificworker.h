@@ -34,13 +34,47 @@
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
+
 class SpecificWorker : public GenericWorker
 {
+  
+ 
+ struct target{
+  
+  bool active=false;
+  mutable QMutex m;
+  
+  QVec pose;
+  
+  void setActive(bool V){
+    QMutexLocker ml(&m);
+    active=V;
+  }
+  
+  
+  void copy(float x, float z){
+    
+    QMutex ml(&m); 
+    pose[0]=x;
+    pose[1]=z;
+  }
+  
+  QVec getPose(){
+  	QMutex ml(&m); 
+  	return  pose;
+  }
+  
+ };
+ 
+  
 Q_OBJECT
+
 public:
 	SpecificWorker(MapPrx& mprx);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
+	
+	void setPick(const Pick  &myPick);
 
 
 public slots:

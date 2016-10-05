@@ -35,11 +35,8 @@ SpecificWorker::~SpecificWorker()
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
-{
-
-	
+{	
 	timer.start(Period);
-	
 
 	return true;
 }
@@ -47,6 +44,13 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 void SpecificWorker::compute()
 {
 
+  /*
+   * if(target.copy...)
+   * 
+   * 
+   **/
+  
+  
 const float threshold = 415; //millimeters, distancia con obstaculos
     float rot = 0.6;  //rads per second
 
@@ -64,9 +68,9 @@ const float threshold = 415; //millimeters, distancia con obstaculos
         std::cout << ldata.front().dist << std::endl;
 	
 	if(ldata[5].angle < 0)
-	  differentialrobot_proxy->setSpeedBase(5, rot); // velocidad de rotacion
+	  differentialrobot_proxy->setSpeedBase(10, rot); // velocidad de rotacion
 	else
-	  differentialrobot_proxy->setSpeedBase(5, -rot);
+	  differentialrobot_proxy->setSpeedBase(10, -rot);
 	
         usleep(rand()%(1500000-100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec, espera antes de girar
     }
@@ -79,20 +83,31 @@ const float threshold = 415; //millimeters, distancia con obstaculos
     {
         std::cout << ex << std::endl;
     }
-
-
-
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
+    
+    //  direc..->getBaseState(bState);
+    //  x
+    //  y
+    //  z
+    
 }
+
+void SpecificWorker::setPick(const Pick &myPick){
+
+  qDebug()<<"usando myPick";
+  
+  
+}
+
+/*
+ * getPick(pick){
+ * target.pose
+ * target.act..=true;
+ * 
+ * }
+ * 
+ * */
+    
+
 
 
 
