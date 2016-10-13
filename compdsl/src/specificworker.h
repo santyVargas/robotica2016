@@ -19,14 +19,8 @@
 
 /**
        \brief
-       @author authorname
+       @author Aldo Rodríguez, Santiago Vargas.
 */
-
-
-
-
-
-
 
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
@@ -34,11 +28,14 @@
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
+#include <math.h>
+#include <complex> 
+
 
 class SpecificWorker : public GenericWorker
 {
   
- 
+int MAX_ADVANCE = 415;
  struct Target{
   
   bool active=false;
@@ -55,6 +52,7 @@ class SpecificWorker : public GenericWorker
   void copy(float x, float z){
     
     QMutexLocker ml(&m); 
+    
     pose.resize(2);
     pose[0]=x;
     pose[1]=z;
