@@ -91,11 +91,13 @@ void SpecificWorker::compute()
    
   // calcular vavance a partitr de dist ******************************
     
-   dist=sqrt(pow(bState.x-xPrima,2) + pow(bState.z - yPrima,2));
+   //dist=sqrt(pow(bState.x-xPrima,2) + pow(bState.z - yPrima,2));
+   dist=sqrt(((bState.x-xPrima,2) * (bState.x-xPrima,2)) + ((bState.z - yPrima,2) * (bState.z - yPrima,2)));
+   qDebug()<<"powwww " << dist;
   
    //normal= norm(dist - angulo);
    
-   qDebug()<<"angulo " << anguloDer << "robot:" << bState.alpha;
+   //qDebug()<<"angulo " << anguloDer << "robot:" << bState.alpha;
    
     
    /*
@@ -120,7 +122,6 @@ void SpecificWorker::compute()
 
   }// final if target
   
-  if(comprueba){
      try
     {
         RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
@@ -136,7 +137,7 @@ void SpecificWorker::compute()
 	
 	//float gain = (float)qrand()/RAND_MAX;
 	
-	if(bState.alpha < anguloDer){
+	if(bState.alpha < 0){
 	  differentialrobot_proxy->setSpeedBase(10, anguloDer); // gira a la izquierda 
       }  
 	else
@@ -154,7 +155,6 @@ void SpecificWorker::compute()
     {
         std::cout << ex << std::endl;
     }//fin try
-  }
   
 /*  
   
