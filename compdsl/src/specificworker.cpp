@@ -43,158 +43,59 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
-  bool comprueba=false;
-  RoboCompDifferentialRobot::TBaseState bState;
-  differentialrobot_proxy->getBaseState(bState); 
-  
-  float xPrima, yPrima, anguloDer, anguloIzq, vadvance, dist, normal;
-  //const float threshold = 415; //millimeters, distancia con obstaculos
-  
+ 
   if(target.isActive())
   {
-    comprueba=true;
-    //differentialrobot_proxy->setSpeedBase(200, 0); 
-   target.setActive(false);
-  
-   QVec t = target.getPose();
-  
-   //QVec r = QVec::vec2(bState.x, bState.z);
-   //float distNorm = (t-r).norm2(); // distancia entre los dos puntos
-   QVec r;
-   r.resize(2);
-   r[0]= bState.x;
-   r[1]= bState.z;
-   //float distNorm = (t-r).norm2();
-  
-  // pasar target al sistema de referencia del Robot   
-  // calcular ángulo con atan2
-
-   xPrima = ((cos(bState.alpha) * bState.x) + (-sin(bState.alpha) * bState.z)) + t[0]; //x'
-   yPrima = ((sin(bState.alpha) * bState.x) + (cos(bState.alpha) * bState.z)) + t[1]; //z'
-   
-   anguloDer = atan2(xPrima, yPrima);
-   
-   //ANGULO NEGATIVO
-   xPrima = ((cos(bState.alpha) * bState.x) + (sin(bState.alpha) * bState.z)) + t[0]; //x'
-   yPrima = ((-sin(bState.alpha) * bState.x) + (cos(bState.alpha) * bState.z)) + t[1]; //z'
-   anguloIzq = atan2(xPrima, yPrima);;
-   
-    //qDebug()<<"angulo " << angulo;
-   
-   /*
-    Convertimos los radianes a grados
-      NumGrados=Radianes*(180/PI);
-      Conertimos los grados a radianes
-      NumRadianes=Grados*(PI/180); 
-    */
-  
-   
-  // calcular vavance a partitr de dist ******************************
     
-   dist=sqrt(pow(bState.x-xPrima,2) + pow(bState.z - yPrima,2));
-  
-   //normal= norm(dist - angulo);
-   
-   qDebug()<<"angulo " << anguloDer << "robot:" << bState.alpha;
-   
-    
-   /*
-   if(bState.alpha < angulo ){
-     differentialrobot_proxy->setSpeedBase(5, angulo);
-      
-   }else 
-     if(bState.alpha > angulo ){
-     differentialrobot_proxy->setSpeedBase(5, -angulo);
-     }else{
-	  differentialrobot_proxy->setSpeedBase(0, 0);
-      }
-      */
-      
-   
-   //vadvance = dist;
-      
-  // if (vadvance > MAX_ADVANCE)
-    // vadvance = MAX_ADVANCE;
-  
-  // calcular vrot a partit del angulo
+      float c;
+      float d;
+      getDisAndRot(c,d);
 
-  }// final if target
-  
-  if(comprueba){
-     try
-    {
-        RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
-        std::sort( ldata.begin()+5, ldata.end()-5, [](RoboCompLaser::TData a, RoboCompLaser::TData b)
-	{ 
-	  return     a.dist < b.dist; 
-	  
-	}) ;  //sort laser data from small to large distances using a lambda function.
-
-      if( dist < MAX_ADVANCE) //
-      {
-        std::cout << ldata.front().dist << std::endl;
-	
-	//float gain = (float)qrand()/RAND_MAX;
-	
-	if(bState.alpha < anguloDer){
-	  differentialrobot_proxy->setSpeedBase(10, anguloDer); // gira a la izquierda 
-      }  
-	else
-	  differentialrobot_proxy->setSpeedBase(10, -anguloDer); // sgira derecha
-	  
-	
-        usleep(rand()%(1500000-100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec, espera antes de girar
-      }
-      else
-      {
-        differentialrobot_proxy->setSpeedBase(200, 0); 
+      
+      float kr=0.5;
+      float kv=0.1;
+      float ec=0.2;
+      float ed=1;
+      
+      printf("c= %f d= %f\n",c,d);
+      
+      if(abs(c)>ec )
+      differentialrobot_proxy->setSpeedBase(0,kr* c);
+      else if(d>ed)
+	differentialrobot_proxy->setSpeedBase(kv*d,0);
+      else{
+	target.setActive(false);
+	printf("destino alcanzado");
       }
     }
-    catch(const Ice::Exception &ex)
-    {
-        std::cout << ex << std::endl;
-    }//fin try
-  }
-  
-/*  
-  
-  float rot = 0.6;  //rads per second
-
-    try
-    {
-        RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
-        std::sort( ldata.begin()+5, ldata.end()-5, [](RoboCompLaser::TData a, RoboCompLaser::TData b)
-	{ 
-	  return     a.dist < b.dist; 
-	  
-	}) ;  //sort laser data from small to large distances using a lambda function.
-
-    if( ldata[5].dist < threshold) //
-    {
-        std::cout << ldata.front().dist << std::endl;
-	
-	float gain = (float)qrand()/RAND_MAX;
-	
-	if(ldata[5].angle < 0){
-	  differentialrobot_proxy->setSpeedBase(10, rot*gain); // gira a la izquierda
-    }  
-	else
-	  differentialrobot_proxy->setSpeedBase(10, -rot*gain); // sgira derecha
-	  
-	
-        usleep(rand()%(1500000-100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec, espera antes de girar
-    }
-    else
-    {
-        differentialrobot_proxy->setSpeedBase(200, 0); 
-    }
-    }
-    catch(const Ice::Exception &ex)
-    {
-        std::cout << ex << std::endl;
-    }//fin try
-    */
 }
+
+
+void SpecificWorker::getDisAndRot(float &c,float &d){
+      RoboCompDifferentialRobot::TBaseState bState;
+      differentialrobot_proxy->getBaseState( bState);
+      //Taux= vector que va desde el robot al target en cordenadas globales
+      float Taux[2];
+      Taux[0]=(target.getPose()[0]-bState.x);
+      Taux[1]=(target.getPose()[1]-bState.z);
+      
+      //MatRot matriz de rotacion para girar el vector Taux en sentido contrario
+      //a la rotacion alpha del robot
+      float MatRot[2][2];
+      MatRot[0][0]=cos(bState.alpha);MatRot[0][1]=-sin(bState.alpha);
+      MatRot[1][0]=sin(bState.alpha);MatRot[1][1]=cos(bState.alpha);
+      
+      //Tr contiene las cordenadas de target respecto al sistema de cordenadas
+      //del robot
+      float Tr[2];
+      Tr[0]=MatRot[0][0]*Taux[0]+MatRot[0][1]*Taux[1];
+      Tr[1]=MatRot[1][0]*Taux[0]+MatRot[1][1]*Taux[1];
+      
+      c=qAtan2(Tr[0],Tr[1]);
+      d=sqrt(Tr[0]*Tr[0]+Tr[1]*Tr[1]);
+  
+}
+
 
 void SpecificWorker::setPick(const Pick &myPick){
   
