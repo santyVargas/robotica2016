@@ -81,8 +81,8 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	
 	void setPick(const Pick &myPick);
-
-
+	
+	
 public slots:
 	void compute(); 	
 
