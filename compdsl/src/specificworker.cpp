@@ -43,57 +43,48 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 void SpecificWorker::compute()
 {
- 
-  if(target.isActive())
-  {
+   RoboCompDifferentialRobot::TBaseState bState;
+   differentialrobot_proxy->getBaseState(bState);
+      
+   float angulo; //angulo
+   float distancia; //distancia
+   float meta; //meta
     
-      float c;
-      float d;
-      getDisAndRot(c,d);
-
+   float vTarget[2];
       
-      float kr=0.5;
-      float kv=0.1;
-      float ec=0.2;
-      float ed=1;
+         
+   vTarget[0]=(cos(bState.alpha)*(target.getPose()[0]-bState.x)) + (-sin(bState.alpha)*(target.getPose()[1]-bState.z));
+   vTarget[1]=(sin(bState.alpha)*(target.getPose()[0]-bState.x)) - (cos(bState.alpha)*(target.getPose()[1]-bState.z));
       
-      printf("c= %f d= %f\n",c,d);
-      
-      if(abs(c)>ec )
-      differentialrobot_proxy->setSpeedBase(0,kr* c);
-      else if(d>ed)
-	differentialrobot_proxy->setSpeedBase(kv*d,0);
-      else{
+   angulo=atan2(vTarget[0],vTarget[1]);
+     
+   meta=sqrt(vTarget[0]*vTarget[0]+vTarget[1]*vTarget[1]);
+   distancia=sqrt( ((bState.x-vTarget[0])*(bState.x-vTarget[0])) + ((bState.z-vTarget[1])*(bState.z-vTarget[1])) );
+    
+    
+  if(target.isActive())
+  {    
+    
+    qDebug()<<"angulo= " << angulo <<" distancia= " << distancia << "meta= " << meta;
+    
+    if(meta<5)
+      {
+	qDebug()<<"destino alcanzado";
+	differentialrobot_proxy->setSpeedBase(0,0);
 	target.setActive(false);
-	printf("destino alcanzado");
+      }
+      
+    else{
+    
+      if(abs(angulo)>0.2)
+	differentialrobot_proxy->setSpeedBase(0, angulo * 0.5); //gira
+      else
+      {
+	if(distancia>1)
+	  differentialrobot_proxy->setSpeedBase(0.1*distancia+50,0); // avanza
       }
     }
-}
-
-
-void SpecificWorker::getDisAndRot(float &c,float &d){
-      RoboCompDifferentialRobot::TBaseState bState;
-      differentialrobot_proxy->getBaseState( bState);
-      //Taux= vector que va desde el robot al target en cordenadas globales
-      float Taux[2];
-      Taux[0]=(target.getPose()[0]-bState.x);
-      Taux[1]=(target.getPose()[1]-bState.z);
-      
-      //MatRot matriz de rotacion para girar el vector Taux en sentido contrario
-      //a la rotacion alpha del robot
-      float MatRot[2][2];
-      MatRot[0][0]=cos(bState.alpha);MatRot[0][1]=-sin(bState.alpha);
-      MatRot[1][0]=sin(bState.alpha);MatRot[1][1]=cos(bState.alpha);
-      
-      //Tr contiene las cordenadas de target respecto al sistema de cordenadas
-      //del robot
-      float Tr[2];
-      Tr[0]=MatRot[0][0]*Taux[0]+MatRot[0][1]*Taux[1];
-      Tr[1]=MatRot[1][0]*Taux[0]+MatRot[1][1]*Taux[1];
-      
-      c=qAtan2(Tr[0],Tr[1]);
-      d=sqrt(Tr[0]*Tr[0]+Tr[1]*Tr[1]);
-  
+  }
 }
 
 

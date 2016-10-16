@@ -83,13 +83,13 @@ public:
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	void setPick(const Pick &myPick);
-	void getDisAndRot(float &c,float &d);
 
 public slots:
 	void compute(); 	
 
 private:
 	Target target;
+	float clicX,clicZ;
 };
 
 #endif
