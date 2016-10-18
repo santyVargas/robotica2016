@@ -49,15 +49,38 @@ void SpecificWorker::compute()
    float angulo; //angulo
    float distancia; //distancia
    float meta; //meta
-    
+   float avance;
+   float B; 
    float vTarget[2];
-      
+   
+   //float tR[2];//trx y trz
+   
+   //tR[0]=( (sin(-bState.alpha) * tr1) + (cos(-bState.alpha) * tr2) );
+   //tR[1]=( (-cos(-bState.alpha) * tr1) + (sin(-bState.alpha) * tr2) );
          
    vTarget[0]=(cos(bState.alpha)*(target.getPose()[0]-bState.x)) + (-sin(bState.alpha)*(target.getPose()[1]-bState.z));
    vTarget[1]=(sin(bState.alpha)*(target.getPose()[0]-bState.x)) - (cos(bState.alpha)*(target.getPose()[1]-bState.z));
       
-   angulo=atan2(vTarget[0],vTarget[1]);
+   //B=atan2(tR[0],tR[1]);
      
+   //avance=abs(tR);
+   /*
+   if(avance<30)//lega a destino
+   {
+     qDebug()<<"destino alcanzado";
+     differentialrobot_proxy->setSpeedBase(0,0);
+     target.setActive(false);
+   }
+   
+   if(abs(B)>0.05)
+   {
+     avance=0;
+     
+   }else{
+      differentialrobot_proxy->setSpeedBase(avance, B); //avanza
+   }
+   */
+   
    meta=sqrt(vTarget[0]*vTarget[0]+vTarget[1]*vTarget[1]);
    distancia=sqrt( ((bState.x-vTarget[0])*(bState.x-vTarget[0])) + ((bState.z-vTarget[1])*(bState.z-vTarget[1])) );
     
