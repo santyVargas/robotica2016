@@ -61,18 +61,15 @@ int MAX_ADVANCE = 415;
   bool isActive()
   {
     QMutexLocker ml(&m); 
-    
     return  active;
+    
   }
   
   QVec getPose(){
     QMutexLocker ml(&m); 
     return  pose;
   }
-  void print(){
-    qDebug()<<"posicion objetivo";
-    pose.print("");
-  } 
+  
  };
  
   
@@ -82,19 +79,15 @@ public:
 	SpecificWorker(MapPrx& mprx);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
+	
 	void setPick(const Pick &myPick);
-<<<<<<< HEAD
 	
 	
-=======
-
->>>>>>> 516da0ec6a9d6af4b63cc9a518f1351c315ac8cf
 public slots:
 	void compute(); 	
 
 private:
 	Target target;
-	float clicX,clicZ;
 };
 
 #endif

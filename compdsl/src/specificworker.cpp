@@ -49,25 +49,19 @@ void SpecificWorker::compute()
    float angulo; //angulo
    float distancia; //distancia
    float meta; //meta
-<<<<<<< HEAD
    float avance;
    float B; 
    float vTarget[2];
+   
    
    //float tR[2];//trx y trz
    
    //tR[0]=( (sin(-bState.alpha) * tr1) + (cos(-bState.alpha) * tr2) );
    //tR[1]=( (-cos(-bState.alpha) * tr1) + (sin(-bState.alpha) * tr2) );
-=======
-    
-   float vTarget[2];
-      
->>>>>>> 516da0ec6a9d6af4b63cc9a518f1351c315ac8cf
          
    vTarget[0]=(cos(bState.alpha)*(target.getPose()[0]-bState.x)) + (-sin(bState.alpha)*(target.getPose()[1]-bState.z));
    vTarget[1]=(sin(bState.alpha)*(target.getPose()[0]-bState.x)) - (cos(bState.alpha)*(target.getPose()[1]-bState.z));
       
-<<<<<<< HEAD
    //B=atan2(tR[0],tR[1]);
      
    //avance=abs(tR);
@@ -88,10 +82,6 @@ void SpecificWorker::compute()
    }
    */
    
-=======
-   angulo=atan2(vTarget[0],vTarget[1]);
-     
->>>>>>> 516da0ec6a9d6af4b63cc9a518f1351c315ac8cf
    meta=sqrt(vTarget[0]*vTarget[0]+vTarget[1]*vTarget[1]);
    distancia=sqrt( ((bState.x-vTarget[0])*(bState.x-vTarget[0])) + ((bState.z-vTarget[1])*(bState.z-vTarget[1])) );
     
@@ -118,7 +108,6 @@ void SpecificWorker::compute()
 	  differentialrobot_proxy->setSpeedBase(0.1*distancia+50,0); // avanza
       }
     }
-<<<<<<< HEAD
     /*
   
   float rot = 0.6;  //rads per second
@@ -157,8 +146,6 @@ void SpecificWorker::compute()
         std::cout << ex << std::endl;
     }//fin try
     */
-=======
->>>>>>> 516da0ec6a9d6af4b63cc9a518f1351c315ac8cf
   }
 }
 
