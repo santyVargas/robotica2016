@@ -1,0 +1,69 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+compdsl/CMakeCache.txt
+compdsl/CMakeFiles/
+compdsl/Makefile
+compdsl/README.md.new
+compdsl/bin/
+compdsl/cmake_install.cmake
+compdsl/config
+compdsl/etc/config.new
+compdsl/src/CMakeFiles/
+compdsl/src/CMakeListsSpecific.txt.new
+compdsl/src/CommonBehavior.cpp
+compdsl/src/CommonBehavior.h
+compdsl/src/DifferentialRobot.cpp
+compdsl/src/DifferentialRobot.h
+compdsl/src/Laser.cpp
+compdsl/src/Laser.h
+compdsl/src/Makefile
+compdsl/src/MyFirstComp_automoc.cpp
+compdsl/src/RCISMousePicker.cpp
+compdsl/src/RCISMousePicker.h
+compdsl/src/cmake_install.cmake
+compdsl/src/mainUI.ui.new
+compdsl/src/moc_commonbehaviorI.cpp
+compdsl/src/moc_genericmonitor.cpp
+compdsl/src/moc_genericworker.cpp
+compdsl/src/moc_rcismousepickerI.cpp
+compdsl/src/moc_specificmonitor.cpp
+compdsl/src/moc_specificworker.cpp
+compdsl/src/rcismousepickerI.cpp
+compdsl/src/rcismousepickerI.h
+compdsl/src/specificmonitor.cpp.new
+compdsl/src/specificmonitor.h.new
+compdsl/src/specificworker.cpp.new
+compdsl/src/specificworker.h.new
+compdsl/src/ui_mainUI.h
+
