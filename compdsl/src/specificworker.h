@@ -53,9 +53,10 @@ int MAX_ADVANCE = 415;
     
     QMutexLocker ml(&m); 
     
-    pose.resize(2);
+    pose.resize(3);
     pose[0]=x;
-    pose[1]=z;
+    pose[1]=0;
+    pose[2]=z;
   }
   
   bool isActive()
@@ -81,6 +82,7 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	
 	void setPick(const Pick &myPick);
+	void gotoT();
 	
 	
 public slots:
@@ -88,6 +90,7 @@ public slots:
 
 private:
 	Target target;
+	InnerModel *innermodel;
 };
 
 #endif
