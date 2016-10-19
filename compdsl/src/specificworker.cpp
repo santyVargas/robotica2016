@@ -49,39 +49,52 @@ void SpecificWorker::compute()
    float angulo; //angulo
    float distancia; //distancia
    float meta; //meta
-   float avance;
+   float avance[2];
    float B; 
    float vTarget[2];
    
+   float t_r1, t_r2;
+   float tR[2];//trx y trz
    
-   //float tR[2];//trx y trz
+   t_r1 =target.getPose()[0]-bState.x;
+   t_r2 =target.getPose()[1]-bState.z;
    
-   //tR[0]=( (sin(-bState.alpha) * tr1) + (cos(-bState.alpha) * tr2) );
-   //tR[1]=( (-cos(-bState.alpha) * tr1) + (sin(-bState.alpha) * tr2) );
+   
+   tR[0]=( (sin(-bState.alpha) * t_r1) + (cos(-bState.alpha) * t_r2) );
+   tR[1]=( (-cos(-bState.alpha) * t_r1) + (sin(-bState.alpha) * t_r2) );
          
-   vTarget[0]=(cos(bState.alpha)*(target.getPose()[0]-bState.x)) + (-sin(bState.alpha)*(target.getPose()[1]-bState.z));
-   vTarget[1]=(sin(bState.alpha)*(target.getPose()[0]-bState.x)) - (cos(bState.alpha)*(target.getPose()[1]-bState.z));
-      
-   //B=atan2(tR[0],tR[1]);
+   B=atan2(tR[0],tR[1]);
      
-   //avance=abs(tR);
-   /*
-   if(avance<30)//lega a destino
+   avance[0]=fabs(tR[0]);
+   avance[1]=fabs(tR[1]);
+   
+   meta=sqrt(vTarget[0]*vTarget[0] + vTarget[1]*vTarget[1]);
+   
+   if(target.isActive())
+  {    
+    
+    qDebug()<<"B= " << B;
+   
+   if(avance[0]<30 || avance[1]<30)//lega a destino
    {
      qDebug()<<"destino alcanzado";
      differentialrobot_proxy->setSpeedBase(0,0);
      target.setActive(false);
    }
    
-   if(abs(B)>0.05)
+   if(fabs(B)>0.05)
    {
-     avance=0;
+     differentialrobot_proxy->setSpeedBase(0, B * 0.6);// gira
+     //avance[0]=avance[1]=0;
      
    }else{
-      differentialrobot_proxy->setSpeedBase(avance, B); //avanza
+     qDebug()<<"va avanzar";
+      differentialrobot_proxy->setSpeedBase(10, B); //avanza
    }
-   */
    
+  }
+   //
+   /*
    meta=sqrt(vTarget[0]*vTarget[0]+vTarget[1]*vTarget[1]);
    distancia=sqrt( ((bState.x-vTarget[0])*(bState.x-vTarget[0])) + ((bState.z-vTarget[1])*(bState.z-vTarget[1])) );
     
@@ -108,6 +121,7 @@ void SpecificWorker::compute()
 	  differentialrobot_proxy->setSpeedBase(0.1*distancia+50,0); // avanza
       }
     }
+    */
     /*
   
   float rot = 0.6;  //rads per second
@@ -146,7 +160,7 @@ void SpecificWorker::compute()
         std::cout << ex << std::endl;
     }//fin try
     */
-  }
+  //}
 }
 
 
