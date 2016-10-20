@@ -68,14 +68,11 @@ void SpecificWorker::compute()
    float tR[2];
    
    t_r1 =(target.getPose()[0]-bState.x);
-   t_r2 =(target.getPose()[1]-bState.z);
+   //t_r2 =(target.getPose()[1]-bState.z); // para usar con lo de la clase
+   t_r2 =(target.getPose()[2]-bState.z); // para usar con nustro código
    
    tR[0]=(cos(bState.alpha)*t_r1) + (-sin(bState.alpha)*t_r2);
    tR[1]=(sin(bState.alpha)*t_r1) + (cos(bState.alpha)*t_r2);
-   
-   //QVec vec;
-   //vec.x()=tR[0];
-   //vec.z()=tR[1];
    
    B=atan2(tR[0],tR[1]); // Hay algo mal con el calculo del ángulo
    avance=sqrt(tR[0]*tR[0]+tR[1]*tR[1]); 

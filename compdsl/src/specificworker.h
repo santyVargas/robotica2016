@@ -52,6 +52,10 @@ int MAX_ADVANCE = 415;
   void copy(float x, float z){
     
     QMutexLocker ml(&m); 
+    /*
+    pose.resize(2);
+    pose[0]=x;
+    pose[1]=z;*/
     
     pose.resize(3);
     pose[0]=x;
