@@ -36,6 +36,8 @@ class SpecificWorker : public GenericWorker
 {
   
 int MAX_ADVANCE = 415;
+bool isVisible;
+
  struct Target{
   
   bool active=false;
@@ -87,6 +89,7 @@ public:
 	
 	void setPick(const Pick &myPick);
 	void gotoT();
+	void esquivarCajasLaser();
 	
 	
 public slots:

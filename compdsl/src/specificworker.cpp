@@ -96,11 +96,14 @@ void SpecificWorker::compute()
    }else
      differentialrobot_proxy->setSpeedBase(avance*1.5, B); //avanza
    
-  }
-  /***********************************************/
+  }  
   
+}
+
+
+void SpecificWorker::esquivarCajasLaser(){
   
- /* Primer código(evadir cajas)
+  /* Primer código(evadir cajas)
   * try
     {
         RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
@@ -134,6 +137,7 @@ void SpecificWorker::compute()
     {
         std::cout << ex << std::endl;
     }//fin try*/
+  
 }
 
 
