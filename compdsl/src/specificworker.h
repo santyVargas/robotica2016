@@ -88,8 +88,9 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	
 	void setPick(const Pick &myPick);
-	void gotoT();
-	void esquivarCajasLaser();
+	void gotoT(float dist);
+	void esquivarCajasLaser(float dist);
+	void bug();
 	
 	
 public slots:
@@ -98,6 +99,7 @@ public slots:
 private:
 	Target target;
 	InnerModel *innermodel;
+	int state;
 };
 
 #endif

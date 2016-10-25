@@ -46,7 +46,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 void SpecificWorker::compute()
 {
   /*** Implementación del componente InnerModel ***
-   ** (código realizado en clase) no borrar **//*
+   ** (código realizado en clase) no borrar **/
   try{
    RoboCompDifferentialRobot::TBaseState bState;
    differentialrobot_proxy->getBaseState(bState);
@@ -54,13 +54,26 @@ void SpecificWorker::compute()
    RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
    innermodel->updateTransformValues("base",bState.x,0,bState.z,0,bState.alpha,0);
    
+   float dist = ldata[10].dist;
+   
    if(target.isActive()){
-     gotoT();
+     state = 0; // avanzar
+     //state = esquivarCajasLaser(state);
+     
+     switch(state)
+     {
+       case 0:
+	 gotoT(dist); // ir al objetivo
+	 break;
+       case 1:
+	 esquivarCajasLaser(dist); // estadoBug
+	 break;
+     }
    }
-  }catch(exception){ qDebug()<<"Error en 'compute'"; }*/
+  }catch(exception){ qDebug()<<"Error en 'compute'"; }
   
   /*** Nuestro código 		***
-   * (Calculo de TR manal)	***/
+   * (Calculo de TR manal)	***//*
    RoboCompDifferentialRobot::TBaseState bState;
    differentialrobot_proxy->getBaseState(bState);
    
@@ -82,7 +95,7 @@ void SpecificWorker::compute()
     * (No cambiar, funciona con método InnerModel)
     * asi que debe funcionar con nuestro código
     * 						*/
-   if(target.isActive())
+  /* if(target.isActive())
   {
     qDebug()<<"Agulo: "<<B<<", Distancia: "<<avance;
    if(avance < 30 )//lega a destino
@@ -96,15 +109,47 @@ void SpecificWorker::compute()
    }else
      differentialrobot_proxy->setSpeedBase(avance*1.5, B); //avanza
    
-  }  
+  }  */
   
 }
 
 
-void SpecificWorker::esquivarCajasLaser(){
+void SpecificWorker::esquivarCajasLaser(float dist){
+  //RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData(); 
   
-  /* Primer código(evadir cajas)
-  * try
+   try
+    {
+        RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
+        std::sort( ldata.begin()+5, ldata.end()-5, [](RoboCompLaser::TData a, RoboCompLaser::TData b)
+	{ 
+	  return     a.dist < b.dist; 
+	  
+	}) ;  //sort laser data from small to large distances using a lambda function.
+	
+	  dist = ldata[5].dist;
+	  float vrot, vadvance;
+	  vrot = 1/1000*dist-0.5;
+	  if(ldata[5].angle < 0)
+	{
+	  qDebug()<<"izquierda";
+	  differentialrobot_proxy->setSpeedBase(10, vrot); // gira a la izquierda
+	}  
+	else{
+	  qDebug()<<"izquierda";
+	  differentialrobot_proxy->setSpeedBase(10, vrot); // sgira derecha
+	}
+	  
+	  
+    
+    }catch(exception){}
+  
+
+  
+  
+  //qDebug()<<"Entra en esquivar";
+	
+  /*int state;
+  try
     {
         RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
         std::sort( ldata.begin()+5, ldata.end()-5, [](RoboCompLaser::TData a, RoboCompLaser::TData b)
@@ -113,18 +158,20 @@ void SpecificWorker::esquivarCajasLaser(){
 	  
 	}) ;  //sort laser data from small to large distances using a lambda function.
 
-    if( ldata[5].dist < threshold) //
+    if( ldata[10].dist < 400) 
     {
         std::cout << ldata.front().dist << std::endl;
-	
 	float gain = (float)qrand()/RAND_MAX;
 	
-	if(ldata[5].angle < 0){
+	if(ldata[5].angle < 0)
+	{
+	  state = 1; // entra en BugState
 	  differentialrobot_proxy->setSpeedBase(10, rot*gain); // gira a la izquierda
-    }  
-	else
+	}  
+	else{
+	  state = 1; // entra en BugState
 	  differentialrobot_proxy->setSpeedBase(10, -rot*gain); // sgira derecha
-	  
+	}
 	
         usleep(rand()%(1500000-100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec, espera antes de girar
     }
@@ -136,8 +183,8 @@ void SpecificWorker::esquivarCajasLaser(){
     catch(const Ice::Exception &ex)
     {
         std::cout << ex << std::endl;
-    }//fin try*/
-  
+    }//fin try
+  */
 }
 
 
@@ -148,12 +195,22 @@ void SpecificWorker::setPick(const Pick &myPick)
   target.setActive(true); // se activa Target
 }
 
-void SpecificWorker::gotoT() // método usado en complemento con InnerModel, No cambiar
+void SpecificWorker::gotoT(float dist) // método usado en complemento con InnerModel, No cambiar
 {
   QVec tr = innermodel->transform("base",target.getPose(),"world"); // uso del método transform tomando la posición del Target
   float c=atan2(tr.x(),tr.z()); // calculo del angulo
   float d=tr.norm2(); // calculo de la distancia
-
+  
+  qDebug()<<"Agulo: "<<c<<", Distancia: "<<d;
+  
+  //RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
+  //float dist = ldata[10].dist;
+  
+  if(dist<400){
+    state = 1;
+    qDebug()<<"Entra caja";
+  }
+  
   if(d < 30 ) // sí distancia es menor a 30, llega al destino
    {
      qDebug()<<"destino alcanzado";
@@ -166,23 +223,22 @@ void SpecificWorker::gotoT() // método usado en complemento con InnerModel, No 
      differentialrobot_proxy->setSpeedBase(d*1.5, c); //avanzar (bajar velocidad, primer parámetro)
 }
 
-/* MENSAJE
- * Para probar el código con el método InnerModel->transform usado en clase
- * descomenta el primer bloque de código del método ::compute
- * y comentar todo lo demás Bloque nuestro código y Bloque isActive
- */
-
-/* Funciones a Implementar:
- *
- * El Robot debe llega al objetivo y esquivar las cajas:
- * 	Crear un nuevo método que realice esta acción
- * 	Crear variable bool isVisible
- * 	
- * 	Haciendo uso del laser, isVisible sera True mientras
- * 	Target sea visible, ejecutando gotoT el Robot ira al objetivo
- * 	(hay que tomar todos los puntos del laser para ello)
- * 	cuando no sea visible ahi seran realizados los calculos de esquivo
- * 	llamando a nuestro método creado previamente
- * 	Nuestro código que tenemos para evadir cajas sera útil pero muy poco
- * 	este calculo es otra cosa completamente
- */
+void SpecificWorker::bug()
+{
+  /*
+  if(cruzarLinea)
+  {
+    state = State::gotoT();
+    return;
+  }
+  
+  float d = laser[10].dist;
+  if(d>160){ // gira derecha
+    vr = -0.2;
+  }
+  if(d<130{
+    vr = 0.2;
+  }
+  //float vadv = ex
+  */
+}
