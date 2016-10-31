@@ -88,12 +88,11 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 	
 	void setPick(const Pick &myPick);
-	void gotoT(float dist);
+	void gotoTarget(float dist);
 	void esquivarCajasLaser(float dist);
 	void bug();
 	bool obstacle();
 	bool targetAtSight();
-	void gotoTarget();
 	
 	
 public slots:
@@ -103,6 +102,8 @@ private:
 	Target target;
 	InnerModel *innermodel;
 	State state;
+	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
+	RoboCompDifferentialRobot::TBaseState bState;
 };
 
 #endif
