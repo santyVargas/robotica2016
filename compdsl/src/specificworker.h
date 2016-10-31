@@ -35,7 +35,7 @@
 class SpecificWorker : public GenericWorker
 {
   
-int MAX_ADVANCE = 415;
+int MAX_ADVANCE = 500;
 bool isVisible;
 
  struct Target{
@@ -69,7 +69,6 @@ bool isVisible;
   {
     QMutexLocker ml(&m); 
     return  active;
-    
   }
   
   QVec getPose(){
@@ -79,7 +78,8 @@ bool isVisible;
   
  };
  
-  
+
+enum class State{IDLE,INIT,GOTO,BUG};
 Q_OBJECT
 
 public:
@@ -91,6 +91,9 @@ public:
 	void gotoT(float dist);
 	void esquivarCajasLaser(float dist);
 	void bug();
+	bool obstacle();
+	bool targetAtSight();
+	void gotoTarget();
 	
 	
 public slots:
@@ -99,7 +102,7 @@ public slots:
 private:
 	Target target;
 	InnerModel *innermodel;
-	int state;
+	State state;
 };
 
 #endif

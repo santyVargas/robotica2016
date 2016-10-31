@@ -23,7 +23,7 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-
+  state = State::INIT;
 }
 
 /**
@@ -54,20 +54,44 @@ void SpecificWorker::compute()
    RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
    innermodel->updateTransformValues("base",bState.x,0,bState.z,0,bState.alpha,0);
    
-   float dist = ldata[10].dist;
+   float dist ;
    
    if(target.isActive()){
-     state = 0; // avanzar
-     //state = esquivarCajasLaser(state);
+     
+     try
+    {
+        //RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
+        std::sort( ldata.begin()+5, ldata.end()-5, [](RoboCompLaser::TData a, RoboCompLaser::TData b)
+	{ 
+	  return     a.dist < b.dist; 
+	  
+	}) ;  //sort laser data from small to large distances using a lambda function.
+	dist = ldata[10].dist;
+	qDebug()<<"prueba: "<<ldata.front().dist;
+    }catch(exception){
+	}
      
      switch(state)
      {
-       case 0:
+       case State::IDLE:
+	 if ( target.isActive() )
+	  state = State::GOTO;
+	 break;
+       case State::GOTO:
+	 gotoTarget();
+	 break;
+       case State::BUG:
+	 bug();
+	 break;
+	 /*
 	 gotoT(dist); // ir al objetivo
 	 break;
-       case 1:
+       case State::BUGg:
 	 esquivarCajasLaser(dist); // estadoBug
 	 break;
+       default:
+	 //state = 0;
+	 break;*/
      }
    }
   }catch(exception){ qDebug()<<"Error en 'compute'"; }
@@ -108,16 +132,13 @@ void SpecificWorker::compute()
      differentialrobot_proxy->setSpeedBase(0, B*2);// gira 
    }else
      differentialrobot_proxy->setSpeedBase(avance*1.5, B); //avanza
-   
   }  */
-  
 }
 
 
 void SpecificWorker::esquivarCajasLaser(float dist){
-  //RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData(); 
   
-   try
+  try
     {
         RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
         std::sort( ldata.begin()+5, ldata.end()-5, [](RoboCompLaser::TData a, RoboCompLaser::TData b)
@@ -125,30 +146,19 @@ void SpecificWorker::esquivarCajasLaser(float dist){
 	  return     a.dist < b.dist; 
 	  
 	}) ;  //sort laser data from small to large distances using a lambda function.
-	
-	  dist = ldata[5].dist;
-	  float vrot, vadvance;
-	  vrot = 1/1000*dist-0.5;
-	  if(ldata[5].angle < 0)
-	{
-	  qDebug()<<"izquierda";
-	  differentialrobot_proxy->setSpeedBase(10, vrot); // gira a la izquierda
-	}  
-	else{
-	  qDebug()<<"izquierda";
-	  differentialrobot_proxy->setSpeedBase(10, vrot); // sgira derecha
-	}
-	  
-	  
-    
-    }catch(exception){}
-  
 
-  
-  
-  //qDebug()<<"Entra en esquivar";
-	
-  /*int state;
+    if( ldata[10].dist < 600) 
+    {
+      differentialrobot_proxy->setSpeedBase(0, 0); 
+    }else{
+      
+    }
+    }catch(exception){}
+
+	  
+	  
+ 
+  /*
   try
     {
         RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
@@ -187,12 +197,12 @@ void SpecificWorker::esquivarCajasLaser(float dist){
   */
 }
 
-
 void SpecificWorker::setPick(const Pick &myPick)
 {
   qDebug()<<"usando myPick: x = "<<myPick.x<<", z = "<<myPick.z;
   target.copy(myPick.x, myPick.z);
   target.setActive(true); // se activa Target
+  //state=0;
 }
 
 void SpecificWorker::gotoT(float dist) // método usado en complemento con InnerModel, No cambiar
@@ -201,13 +211,10 @@ void SpecificWorker::gotoT(float dist) // método usado en complemento con Inner
   float c=atan2(tr.x(),tr.z()); // calculo del angulo
   float d=tr.norm2(); // calculo de la distancia
   
-  qDebug()<<"Agulo: "<<c<<", Distancia: "<<d;
-  
-  //RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
-  //float dist = ldata[10].dist;
-  
-  if(dist<400){
-    state = 1;
+  //qDebug()<<"Agulo: "<<c<<", Distancia: "<<d;
+  qDebug()<<"Laser: "<<dist;
+  if(dist+200<MAX_ADVANCE){
+    //state = 1;
     qDebug()<<"Entra caja";
   }
   
@@ -218,27 +225,68 @@ void SpecificWorker::gotoT(float dist) // método usado en complemento con Inner
      target.setActive(false); // se desactiva Target
    }else if(fabs(c) > 0.05)
    {
-     differentialrobot_proxy->setSpeedBase(0, c*2); // girar (si no te gusta que sea tan rápido, disminuye el segundo parámetro).
+     differentialrobot_proxy->setSpeedBase(0, c*2); 
    }else
-     differentialrobot_proxy->setSpeedBase(d*1.5, c); //avanzar (bajar velocidad, primer parámetro)
+     differentialrobot_proxy->setSpeedBase(d*1.5, c);
 }
 
-void SpecificWorker::bug()
+
+void SpecificWorker::gotoTarget()
 {
-  /*
-  if(cruzarLinea)
+  float rot=0.6;
+  
+  if(obstacle() == true)   // If ther is an obstacle ahead, then transit to BUGg
   {
-    state = State::gotoT();
+    state = State::BUG;
     return;
   }
   
-  float d = laser[10].dist;
+  QVec rt = innermodel->transform("base", target.getPose(), "world");
+  float dist = rt.norm2();
+  float ang  = atan2(rt.x(), rt.z());
+  
+  if(dist < 100) // If close to obstacle stop and transit to IDLE
+  {
+    state = State::IDLE;
+    target.setActive(true);
+    return;
+  }
+  float adv = dist;
+  if ( fabs( rot) > 0.05 )
+   adv = 0;
+ }
+ 
+void SpecificWorker::bug()
+{
+  RoboCompDifferentialRobot::TBaseState bState;
+  differentialrobot_proxy->getBaseState(bState);
+  
+  RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
+  float vr,k;
+  if(true)//cruzar linea
+  {
+    state = State::GOTO; //gotoTarget
+    return;
+  }
+  
+  float d = ldata[10].dist;
   if(d>160){ // gira derecha
-    vr = -0.2;
+    vr = d * k; // velocidad de rotacion 
   }
-  if(d<130{
-    vr = 0.2;
+  if(d<130){
+    vr = - d * k;
   }
-  //float vadv = ex
-  */
+  float vadv = exp(fabs(vr)*bState.alpha)*250; // velocidad de avance
+  differentialrobot_proxy->setSpeedBase(vadv,vr);
+  
+}
+
+bool SpecificWorker::obstacle()
+{
+  return true;
+}
+
+bool SpecificWorker::targetAtSight()
+{
+  return true;
 }
