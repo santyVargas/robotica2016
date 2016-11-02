@@ -35,7 +35,7 @@
 class SpecificWorker : public GenericWorker
 {
   
-int MAX_ADVANCE = 500;
+int MAX_ADVANCE = 600;
 bool isVisible;
 
  struct Target{

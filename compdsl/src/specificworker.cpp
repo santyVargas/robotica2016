@@ -147,8 +147,6 @@ void SpecificWorker::esquivarCajasLaser(float dist){
     }
     }catch(exception){}
 
-	  
-	  
  
   /*
   try
@@ -209,7 +207,7 @@ void SpecificWorker::gotoTarget(float dist) // método usado en complemento con 
   float c=atan2(tr.x(),tr.z()); // calculo del angulo
   float d=tr.norm2(); // calculo de la distancia
   
-  qDebug()<<"Agulo: "<<c<<", Distancia: "<<d;
+  qDebug()<<"Agulo: "<< c <<", Distancia: "<<d;
   if(dist+200<MAX_ADVANCE){
     qDebug()<<"Entra caja";
   }
@@ -218,6 +216,9 @@ void SpecificWorker::gotoTarget(float dist) // método usado en complemento con 
    {
      qDebug()<<"destino alcanzado";
      differentialrobot_proxy->setSpeedBase(0,0);
+     
+     //hay que hacer que siga moviendose solo     
+     
      target.setActive(false); // se desactiva Target
    }else if(fabs(c) > 0.05)
    {
@@ -231,9 +232,9 @@ void SpecificWorker::bug()
   qDebug()<<"entra a Bug";
   differentialrobot_proxy->setSpeedBase(0,0); // detiene el robot
 
-  float d = ldata[10].dist;
-  float vr = 0.5;
-  float angulo = 1.5707;
+  float d = ldata[12].dist;
+  float vr = 0.6;
+  float angulo = 1.5707;//90 en radianes
   //float gain = (float)qrand()/RAND_MAX;
   if(d > 160)
   {
@@ -242,8 +243,7 @@ void SpecificWorker::bug()
       differentialrobot_proxy->setSpeedBase(5, vr); // gira a la izquierda
       
     }
-    usleep(2000000);
-    differentialrobot_proxy->setSpeedBase(0, 0); // gira a la izquierda
+    //usleep(2000000);
   }  
 	
   if(d < 130)
@@ -252,12 +252,15 @@ void SpecificWorker::bug()
     {
       differentialrobot_proxy->setSpeedBase(5, -vr); // sgira derecha
     }
-    usleep(2000000);
-    differentialrobot_proxy->setSpeedBase(0, 0); // gira a la izquierda
+    //usleep(2000000);
   }
+  
+  differentialrobot_proxy->setSpeedBase(0, 0); // gira a la izquierda
   
   float vadv = exp(-fabs(vr*bState.alpha))*250;
   differentialrobot_proxy->setSpeedBase(vadv,vr);
+ 
+  state=State::GOTO;
 }
  
 bool SpecificWorker::obstacle()
@@ -271,9 +274,11 @@ bool SpecificWorker::obstacle()
 	  
 	}) ;  //sort laser data from small to large distances using a lambda function.
 
-    if( ldata[10].dist < MAX_ADVANCE) 
+    if( ldata[12].dist < MAX_ADVANCE){ 
+      qDebug()<<"  HAY OBSTACULO";
       return true;
-    else
+      
+    }else
       return false;
     }catch(exception){}
   
