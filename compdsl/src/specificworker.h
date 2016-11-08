@@ -26,18 +26,41 @@
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
+#include <simplifypath/simplifyPath.h>
+
 #include <math.h>
 #include <complex> 
 
 
 class SpecificWorker : public GenericWorker
 {
-  
-int MAX_ADVANCE = 300;
-int THRESHOLD = 250;
-bool isVisible;
 
- struct Target{
+  Q_OBJECT
+  
+  public:
+	SpecificWorker(MapPrx& mprx);	
+	~SpecificWorker();
+	bool setParams(RoboCompCommonBehavior::ParameterList params);
+	void setPick(const Pick &myPick);
+	void gotoTarget(float dist);
+	void bugInit();
+	void bug();
+	bool obstacle();
+	bool secondDist();
+	bool targetAtSight();
+	
+	int MAX_ADVANCE = 300;
+	int THRESHOLD = 250;
+	bool isVisible;
+	
+public slots:
+	void compute();
+ 	
+private:
+  
+  enum class State{INIT,GOTO,BUG,END, BUGINIT};
+  
+  struct Target{
   
   bool active=false;
   mutable QMutex m;
@@ -76,35 +99,17 @@ bool isVisible;
   }
   
  };
+  
+ Target target;
+ InnerModel *innermodel;
+ State state= State::INIT;
+ Target pick;
+ QLine2D linea;
+ RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
+ RoboCompDifferentialRobot::TBaseState bState;
+ float staticAngle; // angulo del robot para manejar el cambio entre estado Bug y Buginit
+ bool checkAngle; // chequeo de staticAngle
  
-
-enum class State{IDLE,INIT,GOTO,BUG};
-Q_OBJECT
-
-public:
-	SpecificWorker(MapPrx& mprx);	
-	~SpecificWorker();
-	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	void setPick(const Pick &myPick);
-	void gotoTarget(float dist);
-	void bugInit();
-	void bug();
-	bool obstacle();
-	bool secondDist();
-	bool targetAtSight();
-	
-	
-public slots:
-	void compute(); 	
-
-private:
-	Target target;
-	InnerModel *innermodel;
-	State state;
-	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
-	RoboCompDifferentialRobot::TBaseState bState;
-	float staticAngle; // angulo del robot para manejar el cambio entre estado Bug y Buginit
-	bool checkAngle; // chequeo de staticAngle
 };
 
 #endif

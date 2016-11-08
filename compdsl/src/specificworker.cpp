@@ -37,7 +37,7 @@ SpecificWorker::~SpecificWorker()
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
   try{
-  state=State::IDLE;
+  state=State::INIT;
   innermodel = new InnerModel("/home/robocomp/robocomp/files/innermodel/simpleworld.xml");
   }catch(exception){ qDebug()<<"Error en 'setParams'"; }
 	timer.start(Period);
@@ -54,20 +54,25 @@ void SpecificWorker::compute()
    innermodel->updateTransformValues("base",bState.x,0,bState.z,0,bState.alpha,0);
    
    float dist = ldata[10].dist;
+   QVec ini;
    
    if(target.isActive()){
      
      switch(state)
      {
-       case State::IDLE:
-	 if ( target.isActive() )
-	  state = State::GOTO;
+       case State::INIT:
+	 if ( pick.active ){
+	   qDebug() << "DE INIT a GOTO";
+	   state = State::GOTO;
+	   //ini = QVec::vec3(bState.x, 0, bState.z);
+	   //linea = QLine2D( ini, pick.getPose() );
+	 }
 	 break;
        case State::GOTO:
 	 checkAngle=true;
 	 gotoTarget(dist);
 	 break;
-       case State::INIT:
+       case State::BUGINIT:
 	 bugInit();
 	 break;
        case State::BUG:
@@ -77,7 +82,9 @@ void SpecificWorker::compute()
 	 break;
      }
    }
-  }catch(exception){ }
+  }catch(exception){
+    std::cout << "exepcion" << std::endl;
+  }
   
   /*** Nuestro código 		***
    * (Calculo de TR manal)	***//*
@@ -124,7 +131,7 @@ void SpecificWorker::setPick(const Pick &myPick)
   qDebug()<<"usando myPick: x = "<<myPick.x<<", z = "<<myPick.z;
   target.copy(myPick.x, myPick.z);
   target.setActive(true); // se activa Target
-  state= State::IDLE;
+  state= State::INIT;
   //state=0;
 }
 
@@ -142,9 +149,9 @@ void SpecificWorker::gotoTarget(float dist) // método usado en complemento con 
      differentialrobot_proxy->setSpeedBase(0,0);
      
      //hay que hacer que siga moviendose solo     
-    // state=State::IDLE;
+    // state=State::INIT;
      target.setActive(false); // se desactiva Target
-     state=State::IDLE;
+     state=State::INIT;
    }else if(fabs(c) > 0.05)
    {
      differentialrobot_proxy->setSpeedBase(0, c*2); 
@@ -254,5 +261,42 @@ bool SpecificWorker::targetAtSight() // hacemos funcionar este método y creo ya
   
   QVec t = target.getPose();
   return  polygon.contains( QPointF(t.x(), t.z() ) ) */
+  
+  QPolygon poly;
+	for ( auto l: ldata )
+	{
+		QVec r = innermodel->laserTo ( "world","laser",l.dist,l.angle );
+		QPoint p ( r.x(),r.z() );
+		poly << p;
+	}
+	QVec targetInRobot = innermodel->transform("base", pick.getPose(), "world");
+	float dist = targetInRobot.norm2();
+	int veces = int(dist / 200);  //number of times the robot semilength fits in the robot-to-target distance
+	float landa = 1./veces;
+	
+	QList<QPoint> points;
+	points << QPoint(pick.getPose().x(),pick.getPose().z());  //Add target
+	
+	//Add points along lateral lines of robot
+	for (float i=landa; i<= 1.; i+=landa)
+	{
+		QVec point = targetInRobot*(T)landa;
+		QVec pointW = innermodel->transform("world", point ,"base");
+		points << QPoint(pointW.x(), pointW.z());
+		
+		pointW = innermodel->transform("world", point - QVec::vec3(200,0,0), "base");
+		points << QPoint(pointW.x(), pointW.z());
+		
+		pointW = innermodel->transform("world", point + QVec::vec3(200,0,0), "base");
+		points << QPoint(pointW.x(), pointW.z());
+		
+	}
+	foreach( QPoint p, points)
+	{
+		if( poly.containsPoint(p , Qt::OddEvenFill) == false)
+			return false;
+	}
+	return true;
+  
   
 }
