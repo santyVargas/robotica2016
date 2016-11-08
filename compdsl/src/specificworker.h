@@ -35,7 +35,8 @@
 class SpecificWorker : public GenericWorker
 {
   
-int MAX_ADVANCE = 500;
+int MAX_ADVANCE = 300;
+int THRESHOLD = 250;
 bool isVisible;
 
  struct Target{
@@ -86,12 +87,12 @@ public:
 	SpecificWorker(MapPrx& mprx);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
-	
 	void setPick(const Pick &myPick);
 	void gotoTarget(float dist);
-	void esquivarCajasLaser(float dist);
+	void bugInit();
 	void bug();
 	bool obstacle();
+	bool secondDist();
 	bool targetAtSight();
 	
 	
@@ -104,6 +105,8 @@ private:
 	State state;
 	RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
 	RoboCompDifferentialRobot::TBaseState bState;
+	float staticAngle; // angulo del robot para manejar el cambio entre estado Bug y Buginit
+	bool checkAngle; // chequeo de staticAngle
 };
 
 #endif
