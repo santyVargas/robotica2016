@@ -103,7 +103,8 @@ private:
  Target target;
  InnerModel *innermodel;
  State state= State::INIT;
- Target pick;
+ QLine2D line;
+ //Target pick;
  QLine2D linea;
  RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();  //read laser data 
  RoboCompDifferentialRobot::TBaseState bState;

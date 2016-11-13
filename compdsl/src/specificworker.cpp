@@ -48,6 +48,7 @@ void SpecificWorker::compute()
 {
   /*** Implementación del componente InnerModel ***
    ** (código realizado en clase) no borrar **/
+  
   try{
    differentialrobot_proxy->getBaseState(bState);
 
@@ -61,7 +62,7 @@ void SpecificWorker::compute()
      switch(state)
      {
        case State::INIT:
-	 if ( pick.active ){
+	 if ( target.isActive() ){
 	   qDebug() << "DE INIT a GOTO";
 	   state = State::GOTO;
 	   //ini = QVec::vec3(bState.x, 0, bState.z);
@@ -132,7 +133,6 @@ void SpecificWorker::setPick(const Pick &myPick)
   target.copy(myPick.x, myPick.z);
   target.setActive(true); // se activa Target
   state= State::INIT;
-  //state=0;
 }
 
 void SpecificWorker::gotoTarget(float dist) // método usado en complemento con InnerModel, No cambiar
@@ -149,7 +149,6 @@ void SpecificWorker::gotoTarget(float dist) // método usado en complemento con 
      differentialrobot_proxy->setSpeedBase(0,0);
      
      //hay que hacer que siga moviendose solo     
-    // state=State::INIT;
      target.setActive(false); // se desactiva Target
      state=State::INIT;
    }else if(fabs(c) > 0.05)
@@ -168,7 +167,7 @@ void SpecificWorker::gotoTarget(float dist) // método usado en complemento con 
    
    if(obstacle()==true)
    {
-    state=State::INIT;
+    state=State::BUGINIT;
     return;
   }
 }
@@ -176,22 +175,26 @@ void SpecificWorker::gotoTarget(float dist) // método usado en complemento con 
 void SpecificWorker::bug()
 { 
   
-  if(targetAtSight()==true)
+  if(targetAtSight()==true){
     state = State::GOTO;
+    qDebug()<<"Objetivo visible";
+  }
   
   if(secondDist()==true)
   {
     differentialrobot_proxy->setSpeedBase(0, 0);
-    state=State::INIT;
+    state=State::BUGINIT;
+    return;
   }
   differentialrobot_proxy->setSpeedBase(50, -0.2);
 }
 
 void SpecificWorker::bugInit()
 { 
+  
   if(checkAngle)
   {
-     staticAngle = bState.alpha + 1.5707;//90 en radianes
+     staticAngle = bState.alpha + 1.5707;//1.5707;//30 en radianes
      checkAngle=false;
   }
   
@@ -249,18 +252,6 @@ bool SpecificWorker::secondDist()
 
 bool SpecificWorker::targetAtSight() // hacemos funcionar este método y creo ya quedaria todo
 {
-  /*
-  QPolygon polygon;
-  for (auto l, lasercopy)
-  {
-    QVec lr = innermodel->laserTo("world", "laser","world");
-    //QVec lr = innermodel->laserTo("world", "laser", l.dist, l.angle)
-    polygon << QPointF(lr.x(), lr.z());
-    
-  }
-  
-  QVec t = target.getPose();
-  return  polygon.contains( QPointF(t.x(), t.z() ) ) */
   
   QPolygon poly;
 	for ( auto l: ldata )
@@ -269,13 +260,13 @@ bool SpecificWorker::targetAtSight() // hacemos funcionar este método y creo ya
 		QPoint p ( r.x(),r.z() );
 		poly << p;
 	}
-	QVec targetInRobot = innermodel->transform("base", pick.getPose(), "world");
+	QVec targetInRobot = innermodel->transform("base", target.getPose(), "world");
 	float dist = targetInRobot.norm2();
 	int veces = int(dist / 200);  //number of times the robot semilength fits in the robot-to-target distance
 	float landa = 1./veces;
 	
 	QList<QPoint> points;
-	points << QPoint(pick.getPose().x(),pick.getPose().z());  //Add target
+	points << QPoint(target.getPose().x(),target.getPose().z());  //Add target
 	
 	//Add points along lateral lines of robot
 	for (float i=landa; i<= 1.; i+=landa)
