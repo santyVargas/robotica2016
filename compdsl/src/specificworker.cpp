@@ -192,6 +192,12 @@ void SpecificWorker::bug()
 void SpecificWorker::bugInit()
 { 
   
+  if(targetAtSight()==true){
+    state = State::GOTO;
+    qDebug()<<"Objetivo visible";
+  }
+  
+  
   if(checkAngle)
   {
      staticAngle = bState.alpha + 1.5707;//1.5707;//30 en radianes

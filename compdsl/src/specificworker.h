@@ -26,7 +26,7 @@
 #include <genericworker.h>
 #include <innermodel/innermodel.h>
 
-#include <simplifypath/simplifyPath.h>
+//#include <simplifypath/simplifyPath.h>
 
 #include <math.h>
 #include <complex> 
@@ -84,7 +84,7 @@ private:
     pose.resize(3);
     pose[0]=x;
     pose[1]=0;
-    pose[2]=z;
+    pose[2]=-z;
   }
   
   bool isActive()
