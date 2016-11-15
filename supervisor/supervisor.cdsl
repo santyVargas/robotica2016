@@ -1,0 +1,11 @@
+import "/robocomp/interfaces/IDSLs/AprilTags.idsl"
+import "/robocomp/interfaces/IDSLs/GotoPoint.idsl";
+
+Component MyFirstComp{
+    Communications{
+        requires GotoPoint;
+	subscribesTo AprilTags;
+    };
+gui Qt(QWidget);
+language Cpp; //language Python;
+};
