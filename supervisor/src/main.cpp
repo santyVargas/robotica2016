@@ -18,11 +18,11 @@
  */
 
 
-/** \mainpage RoboComp::MyFirstComp
+/** \mainpage RoboComp::Supervisor
  *
  * \section intro_sec Introduction
  *
- * The MyFirstComp component...
+ * The Supervisor component...
  *
  * \section interface_sec Interface
  *
@@ -34,7 +34,7 @@
  * ...
  *
  * \subsection install2_ssec Compile and install
- * cd MyFirstComp
+ * cd Supervisor
  * <br>
  * cmake . && make
  * <br>
@@ -52,7 +52,7 @@
  *
  * \subsection execution_ssec Execution
  *
- * Just: "${PATH_TO_BINARY}/MyFirstComp --Ice.Config=${PATH_TO_CONFIG_FILE}"
+ * Just: "${PATH_TO_BINARY}/Supervisor --Ice.Config=${PATH_TO_CONFIG_FILE}"
  *
  * \subsection running_ssec Once running
  *
@@ -80,8 +80,11 @@
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
 
+#include <apriltagsI.h>
 
+#include <AprilTags.h>
 #include <GotoPoint.h>
+#include <DifferentialRobot.h>
 
 
 // User includes here
@@ -90,14 +93,16 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 
+using namespace RoboCompAprilTags;
 using namespace RoboCompGotoPoint;
+using namespace RoboCompDifferentialRobot;
 
 
 
-class MyFirstComp : public RoboComp::Application
+class Supervisor : public RoboComp::Application
 {
 public:
-	MyFirstComp (QString prfx) { prefix = prfx.toStdString(); }
+	Supervisor (QString prfx) { prefix = prfx.toStdString(); }
 private:
 	void initialize();
 	std::string prefix;
@@ -107,14 +112,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void ::MyFirstComp::initialize()
+void ::Supervisor::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int ::MyFirstComp::run(int argc, char* argv[])
+int ::Supervisor::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -134,10 +139,28 @@ int ::MyFirstComp::run(int argc, char* argv[])
 
 	int status=EXIT_SUCCESS;
 
+	DifferentialRobotPrx differentialrobot_proxy;
 	GotoPointPrx gotopoint_proxy;
 
 	string proxy, tmp;
 	initialize();
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "DifferentialRobotProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy DifferentialRobotProxy\n";
+		}
+		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("DifferentialRobotProxy initialized Ok!");
+	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);//Remote server proxy creation example
 
 
 	try
@@ -156,6 +179,7 @@ int ::MyFirstComp::run(int argc, char* argv[])
 	rInfo("GotoPointProxy initialized Ok!");
 	mprx["GotoPointProxy"] = (::IceProxy::Ice::Object*)(&gotopoint_proxy);//Remote server proxy creation example
 
+	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
 
 	SpecificWorker *worker = new SpecificWorker(mprx);
@@ -190,6 +214,34 @@ int ::MyFirstComp::run(int argc, char* argv[])
 
 
 
+
+		// Server adapter creation and publication
+		if (not GenericMonitor::configGetString(communicator(), prefix, "AprilTagsTopic.Endpoints", tmp, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AprilTagsProxy";
+		}
+		Ice::ObjectAdapterPtr AprilTags_adapter = communicator()->createObjectAdapterWithEndpoints("apriltags", tmp);
+		AprilTagsPtr apriltagsI_ = new AprilTagsI(worker);
+		Ice::ObjectPrx apriltags = AprilTags_adapter->addWithUUID(apriltagsI_)->ice_oneway();
+		IceStorm::TopicPrx apriltags_topic;
+		if(!apriltags_topic){
+		try {
+			apriltags_topic = topicManager->create("AprilTags");
+		}
+		catch (const IceStorm::TopicExists&) {
+		//Another client created the topic
+		try{
+			apriltags_topic = topicManager->retrieve("AprilTags");
+		}
+		catch(const IceStorm::NoSuchTopic&)
+		{
+			//Error. Topic does not exist
+			}
+		}
+		IceStorm::QoS qos;
+		apriltags_topic->subscribeAndGetPublisher(qos, apriltags);
+		}
+		AprilTags_adapter->activate();
 
 		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;
@@ -254,7 +306,7 @@ int main(int argc, char* argv[])
 			printf("Configuration prefix: <%s>\n", prefix.toStdString().c_str());
 		}
 	}
-	::MyFirstComp app(prefix);
+	::Supervisor app(prefix);
 
 	return app.main(argc, argv, configFile.c_str());
 }

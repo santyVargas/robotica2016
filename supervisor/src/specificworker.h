@@ -41,12 +41,63 @@ public:
 	SpecificWorker(MapPrx& mprx);	
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
+	void newAprilTag(const tagsList &tags);
 
 
 public slots:
 	void compute(); 	
 
 private:
+  
+  InnerModel *innerModel;
+  int current = 0;
+  
+  struct Tag
+  {
+    InnerModel *inner;
+    void init(InnerModel *inner_)
+    {
+      inner = inner_;    
+    }
+    bool active=false;
+    mutable QMutex m;
+    QVec pose;
+    int id;
+  
+    void setActive(bool V)
+    {
+      QMutexLocker ml(&m);
+      active=V;
+    }
+    void copy(float x, float z, int id_)
+    {
+      QMutexLocker ml(&m); 
+      pose.resize(3);
+      QVec r = inner->transform("world", QVec::vec3(x,0,z), "rgbd");
+      pose[0]=r.x();
+      pose[1]=0;
+      pose[2]=r.z();
+      id = id_;
+  }
+  
+  bool isActive()
+  {
+    QMutexLocker ml(&m); 
+    return  active;
+  }
+  QVec getPose()
+  {
+    QMutexLocker ml(&m); 
+    return  pose;
+  } 
+  void print()
+  {
+    qDebug() << "Tag" << id;
+    pose.print("pose");
+  }
+ };
+  
+  Tag tag;
 	
 };
 

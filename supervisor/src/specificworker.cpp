@@ -23,7 +23,6 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-
 }
 
 /**
@@ -36,33 +35,65 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-
-
-
+	innerModel= new InnerModel("/home/robocomp/robocomp/files/innermodel/simpleworld.xml");
+	tag.init(innerModel);
 	
-	timer.start(Period);
-	
-
+	timer.start(Period);	
 	return true;
 }
 
 void SpecificWorker::compute()
 {
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
+  try
+  {
+    RoboCompDifferentialRobot::TBaseState bState;
+    differentialrobot_proxy->getBaseState(bState);
+    innerModel->updateTransformValues("base", bState.x, 0, bState.z, 0, bState.alpha, 0);
+  }
+  catch(const Ice::Exception &e)
+  {
+	std::cout << "Error reading from Camera" << e << std::endl;
+	return;
+  }
+ /* 
+//   switch()
+//   {
+
+
+     search
+  
+	  if( tag.getId() == current)
+	    differentialrobot_proxy->stopBase();
+	    gotopoint_proxy->go( tag.get().x(), tag.get().z(), 0 );
+	    state = State::WAIT;
+	  
+	  differentialrobot_proxy->setSpeedBase(0, .3);
+	  
+
+      wait
+      
+	  if gotopoint_proxy->atTarget() == true)
+	    differentialrobot_proxy->stopBase();
+	    current++%4;
+	    state = State::SEARCH;
+	  
+
+//   }*/
 }
 
 
 
 
+///////////////////////////////////
+//SUBSCRIPTION
+///////////////////////////////////
 
+void SpecificWorker::newAprilTag(const tagsList &tags)
+{
+  qDebug() << "Me llego "<< tags[0].id << tags[0].tx << tags[0].tz;
+   
+  tag.copy(tags[0].tx, tags[0].tz, tags[0].id ); 
+  tag.print();
+}
 
 
