@@ -55,34 +55,34 @@ void SpecificWorker::compute()
 	std::cout << "Error reading from Camera" << e << std::endl;
 	return;
   }
- /* 
-//   switch()
-//   {
-
-
-     search
+ 
+   switch(state)
+   {
+     case State::SEARCH:
   
 	  if( tag.getId() == current)
+	  {
 	    differentialrobot_proxy->stopBase();
-	    gotopoint_proxy->go( tag.get().x(), tag.get().z(), 0 );
+	    gotopoint_proxy->go("", tag.getPose().x(), tag.getPose().z(), 0);
 	    state = State::WAIT;
+	  }
 	  
 	  differentialrobot_proxy->setSpeedBase(0, .3);
-	  
+	  break;
 
-      wait
+      case State::WAIT:
       
-	  if gotopoint_proxy->atTarget() == true)
+	  if (gotopoint_proxy->atTarget() == true)
+	  {
 	    differentialrobot_proxy->stopBase();
 	    current++%4;
 	    state = State::SEARCH;
+	  }
+	   break;
 	  
 
-//   }*/
+   }
 }
-
-
-
 
 ///////////////////////////////////
 //SUBSCRIPTION

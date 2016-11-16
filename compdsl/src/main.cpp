@@ -80,11 +80,13 @@
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
 
+#include <gotopointI.h>
 #include <rcismousepickerI.h>
 
 #include <DifferentialRobot.h>
 #include <Laser.h>
 #include <RCISMousePicker.h>
+#include <GotoPoint.h>
 
 
 // User includes here
@@ -96,6 +98,7 @@ using namespace RoboCompCommonBehavior;
 using namespace RoboCompDifferentialRobot;
 using namespace RoboCompLaser;
 using namespace RoboCompRCISMousePicker;
+using namespace RoboCompGotoPoint;
 
 
 
@@ -139,28 +142,11 @@ int ::MyFirstComp::run(int argc, char* argv[])
 
 	int status=EXIT_SUCCESS;
 
-	DifferentialRobotPrx differentialrobot_proxy;
 	LaserPrx laser_proxy;
+	DifferentialRobotPrx differentialrobot_proxy;
 
 	string proxy, tmp;
 	initialize();
-
-
-	try
-	{
-		if (not GenericMonitor::configGetString(communicator(), prefix, "DifferentialRobotProxy", proxy, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy DifferentialRobotProxy\n";
-		}
-		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("DifferentialRobotProxy initialized Ok!");
-	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);//Remote server proxy creation example
 
 
 	try
@@ -178,6 +164,23 @@ int ::MyFirstComp::run(int argc, char* argv[])
 	}
 	rInfo("LaserProxy initialized Ok!");
 	mprx["LaserProxy"] = (::IceProxy::Ice::Object*)(&laser_proxy);//Remote server proxy creation example
+
+
+	try
+	{
+		if (not GenericMonitor::configGetString(communicator(), prefix, "DifferentialRobotProxy", proxy, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy DifferentialRobotProxy\n";
+		}
+		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("DifferentialRobotProxy initialized Ok!");
+	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);//Remote server proxy creation example
 
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 
@@ -210,6 +213,18 @@ int ::MyFirstComp::run(int argc, char* argv[])
 		adapterCommonBehavior->activate();
 
 
+
+
+		// Server adapter creation and publication
+		if (not GenericMonitor::configGetString(communicator(), prefix, "GotoPoint.Endpoints", tmp, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy GotoPoint";
+		}
+		Ice::ObjectAdapterPtr adapterGotoPoint = communicator()->createObjectAdapterWithEndpoints("GotoPoint", tmp);
+		GotoPointI *gotopoint = new GotoPointI(worker);
+		adapterGotoPoint->add(gotopoint, communicator()->stringToIdentity("gotopoint"));
+		adapterGotoPoint->activate();
+		cout << "[" << PROGRAM_NAME << "]: GotoPoint adapter created in port " << tmp << endl;
 
 
 

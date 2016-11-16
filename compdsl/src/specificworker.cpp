@@ -127,13 +127,7 @@ void SpecificWorker::compute()
 }
 
 
-void SpecificWorker::setPick(const Pick &myPick)
-{
-  qDebug()<<"usando myPick: x = "<<myPick.x<<", z = "<<myPick.z;
-  target.copy(myPick.x, myPick.z);
-  target.setActive(true); // se activa Target
-  state= State::INIT;
-}
+
 
 void SpecificWorker::gotoTarget(float dist) // método usado en complemento con InnerModel, No cambiar
 {
@@ -296,4 +290,34 @@ bool SpecificWorker::targetAtSight() // hacemos funcionar este método y creo ya
 	return true;
   
   
+}
+
+void SpecificWorker::setPick(const Pick &myPick)
+{
+  qDebug()<<"usando myPick: x = "<<myPick.x<<", z = "<<myPick.z;
+  target.copy(myPick.x, myPick.z);
+  target.setActive(true); // se activa Target
+  state= State::INIT;
+}
+
+bool SpecificWorker::atTarget()
+{
+  return !target.isActive();
+}
+
+void SpecificWorker::go(const string& nodo, const float x, const float y, const float alpha)
+{
+  target.copy(x, y);
+  target.setActive(true); // se activa Target
+  state= State::INIT;
+}
+
+void SpecificWorker::stop()
+{
+
+}
+
+void SpecificWorker::turn(const float speed)
+{
+
 }

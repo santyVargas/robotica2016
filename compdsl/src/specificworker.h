@@ -52,6 +52,12 @@ class SpecificWorker : public GenericWorker
 	int MAX_ADVANCE = 300;
 	int THRESHOLD = 250;
 	bool isVisible;
+
+	void go(const string &nodo, const float x, const float y, const float alpha);
+	void turn(const float speed);
+	bool atTarget();
+	void stop();
+	
 	
 public slots:
 	void compute();
@@ -60,7 +66,8 @@ private:
   
   enum class State{INIT,GOTO,BUG,END, BUGINIT};
   
-  struct Target{
+  struct Target
+  {
   
   bool active=false;
   mutable QMutex m;

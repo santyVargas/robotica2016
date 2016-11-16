@@ -19,14 +19,8 @@
 
 /**
        \brief
-       @author authorname
+       @author Santiago Vargas M.
 */
-
-
-
-
-
-
 
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
@@ -48,6 +42,7 @@ public slots:
 	void compute(); 	
 
 private:
+  enum class State{SEARCH, WAIT};
   
   InnerModel *innerModel;
   int current = 0;
@@ -90,14 +85,22 @@ private:
     QMutexLocker ml(&m); 
     return  pose;
   } 
+  QVec getId()
+  {
+    QMutexLocker ml(&m); 
+    return  id;
+  }   
   void print()
   {
     qDebug() << "Tag" << id;
     pose.print("pose");
   }
+  
+  
  };
   
   Tag tag;
+  State state= State::SEARCH;
 	
 };
 
