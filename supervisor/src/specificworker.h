@@ -45,7 +45,7 @@ private:
   enum class State{SEARCH, WAIT};
   
   InnerModel *innerModel;
-  int current = 1;
+  int current = 0;
   
   struct Tag
   {

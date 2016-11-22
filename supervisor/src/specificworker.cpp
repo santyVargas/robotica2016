@@ -64,7 +64,7 @@ void SpecificWorker::compute()
 	  {
 	    differentialrobot_proxy->stopBase();
 	    gotopoint_proxy->go(" ", tag.getPose().x(), tag.getPose().z(), 0);
-	    qDebug() << "   imagen vista:  ";
+	    qDebug() << "   IMAGEN   VISTA:  ";
 	    state = State::WAIT;
 	  }
 	  else{
@@ -74,8 +74,8 @@ void SpecificWorker::compute()
 	  break;
 
       case State::WAIT:
-	differentialrobot_proxy->setSpeedBase(0, 0);
-	qDebug() << "estoy en WAIT";
+	//differentialrobot_proxy->setSpeedBase(0, 0);
+	//qDebug() << "estoy en WAIT";
 	  if (gotopoint_proxy->atTarget() == true)
 	  {
 	    differentialrobot_proxy->stopBase();
