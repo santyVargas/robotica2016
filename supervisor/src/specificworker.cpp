@@ -63,21 +63,26 @@ void SpecificWorker::compute()
 	  if( tag.getId() == current)
 	  {
 	    differentialrobot_proxy->stopBase();
-	    gotopoint_proxy->go("", tag.getPose().x(), tag.getPose().z(), 0);
+	    gotopoint_proxy->go(" ", tag.getPose().x(), tag.getPose().z(), 0);
+	    qDebug() << "   imagen vista:  ";
 	    state = State::WAIT;
 	  }
-	  
-	  differentialrobot_proxy->setSpeedBase(0, .3);
+	  else{
+	     differentialrobot_proxy->setSpeedBase(0, .3);
+	  }
+	 
 	  break;
 
       case State::WAIT:
-      
+	differentialrobot_proxy->setSpeedBase(0, 0);
+	qDebug() << "estoy en WAIT";
 	  if (gotopoint_proxy->atTarget() == true)
 	  {
 	    differentialrobot_proxy->stopBase();
 	    current++%4;
 	    state = State::SEARCH;
 	  }
+	  
 	   break;
 	  
 
