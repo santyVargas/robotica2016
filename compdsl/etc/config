@@ -1,4 +1,4 @@
-CommonBehavior.Endpoints=tcp -p 11000
+CommonBehavior.Endpoints=tcp -p 11001
 
 # Proxies for required interfaces
 RCISMousePickerTopic.Endpoints=tcp -p 12323

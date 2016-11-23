@@ -59,33 +59,44 @@ void SpecificWorker::compute()
    switch(state)
    {
      case State::SEARCH:
-  
+       //qDebug()<<"Current: "<<current;
+       //qDebug()<<"SEARCH";
 	  if( tag.getId() == current)
 	  {
 	    differentialrobot_proxy->stopBase();
 	    gotopoint_proxy->go(" ", tag.getPose().x(), tag.getPose().z(), 0);
-	    qDebug() << "   IMAGEN   VISTA:  ";
+	    qDebug() << "   IMAGEN   VISTA:  "<<current;
 	    state = State::WAIT;
 	  }
-	  else{
+	  else
+	  {
 	     differentialrobot_proxy->setSpeedBase(0, .3);
 	  }
 	 
 	  break;
 
       case State::WAIT:
-	//differentialrobot_proxy->setSpeedBase(0, 0);
+	//qDebug()<<"Current: "<<current;
+	//qDebug()<<"WAIT";
+	differentialrobot_proxy->setSpeedBase(0, 0);
 	//qDebug() << "estoy en WAIT";
 	  if (gotopoint_proxy->atTarget() == true)
 	  {
+	    qDebug()<<"TARGET TRUE";
 	    differentialrobot_proxy->stopBase();
 	    current++%4;
 	    state = State::SEARCH;
 	  }
 	  
-	   break;
-	  
-
+	  if(change)
+	  {
+	    qDebug()<<"Destino "<<current<<" alcanzado";
+	    differentialrobot_proxy->stopBase();
+	    current++%4;
+	    change = false;
+	    state = State::SEARCH;
+	  }
+	  break;
    }
 }
 
@@ -95,10 +106,15 @@ void SpecificWorker::compute()
 
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {
-  qDebug() << "Me llego "<< tags[0].id << tags[0].tx << tags[0].tz;
+  //qDebug() << "Me llego "<< tags[0].id << tags[0].tx << tags[0].tz;
    
   tag.copy(tags[0].tx, tags[0].tz, tags[0].id ); 
-  tag.print();
+  //qDebug()<<"Distancia: "<<tags[0].tz;
+  if(tags[0].tz < 600)
+  {
+    change = true;
+  }
+  //tag.print();
 }
 
 
