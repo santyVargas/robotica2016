@@ -68,34 +68,32 @@ void SpecificWorker::compute()
 	    qDebug() << "   IMAGEN   VISTA:  "<<current;
 	    state = State::WAIT;
 	  }
-	  else
-	  {
-	     differentialrobot_proxy->setSpeedBase(0, .3);
-	  }
-	 
+	  differentialrobot_proxy->setSpeedBase(0, .3); // girar
 	  break;
 
       case State::WAIT:
 	//qDebug()<<"Current: "<<current;
 	//qDebug()<<"WAIT";
-	differentialrobot_proxy->setSpeedBase(0, 0);
+	//differentialrobot_proxy->setSpeedBase(0, 0);
 	//qDebug() << "estoy en WAIT";
 	  if (gotopoint_proxy->atTarget() == true)
 	  {
+	    qDebug()<<"Ya llego wey";
 	    qDebug()<<"TARGET TRUE";
 	    differentialrobot_proxy->stopBase();
 	    current++%4;
 	    state = State::SEARCH;
 	  }
 	  
-	  if(change)
+	  /*if(change)
 	  {
 	    qDebug()<<"Destino "<<current<<" alcanzado";
 	    differentialrobot_proxy->stopBase();
+	    differentialrobot_proxy->setSpeedBase(0, 0);
 	    current++%4;
 	    change = false;
 	    state = State::SEARCH;
-	  }
+	  }*/
 	  break;
    }
 }
@@ -110,10 +108,10 @@ void SpecificWorker::newAprilTag(const tagsList &tags)
    
   tag.copy(tags[0].tx, tags[0].tz, tags[0].id ); 
   //qDebug()<<"Distancia: "<<tags[0].tz;
-  if(tags[0].tz < 600)
-  {
-    change = true;
-  }
+  //if(tags[0].tz < 600)
+  //{
+    //change = true;
+ // }
   //tag.print();
 }
 
