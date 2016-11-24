@@ -65,8 +65,6 @@ void SpecificWorker::compute()
 	 if ( target.isActive() ){
 	   qDebug() << "DE INIT a GOTO";
 	   state = State::GOTO;
-	   //ini = QVec::vec3(bState.x, 0, bState.z);
-	   //linea = QLine2D( ini, pick.getPose() );
 	 }
 	 break;
        case State::GOTO:
@@ -87,43 +85,6 @@ void SpecificWorker::compute()
     std::cout << "exepcion" << std::endl;
   }
   
-  /*** Nuestro código 		***
-   * (Calculo de TR manal)	***//*
-   RoboCompDifferentialRobot::TBaseState bState;
-   differentialrobot_proxy->getBaseState(bState);
-   
-   float avance, B, t_r1, t_r2;
-   float tR[2];
-   
-   t_r1 =(target.getPose()[0]-bState.x);
-   //t_r2 =(target.getPose()[1]-bState.z); // para usar con lo de la clase
-   t_r2 =(target.getPose()[2]-bState.z); // para usar con nustro código
-   
-   tR[0]=(cos(bState.alpha)*t_r1) + (-sin(bState.alpha)*t_r2);
-   tR[1]=(sin(bState.alpha)*t_r1) + (cos(bState.alpha)*t_r2);
-   
-   B=atan2(tR[0],tR[1]); // Hay algo mal con el calculo del ángulo
-   avance=sqrt(tR[0]*tR[0]+tR[1]*tR[1]); 
-   
-   
-   /******** Controlador isActive() ************
-    * (No cambiar, funciona con método InnerModel)
-    * asi que debe funcionar con nuestro código
-    * 						*/
-  /* if(target.isActive())
-  {
-    qDebug()<<"Agulo: "<<B<<", Distancia: "<<avance;
-   if(avance < 30 )//lega a destino
-   {
-     qDebug()<<"destino alcanzado";
-     differentialrobot_proxy->setSpeedBase(0,0);
-     target.setActive(false);
-   }else if(fabs(B) > 0.05)
-   {
-     differentialrobot_proxy->setSpeedBase(0, B*2);// gira 
-   }else
-     differentialrobot_proxy->setSpeedBase(avance*1.5, B); //avanza
-  }  */
 }
 
 
@@ -137,7 +98,7 @@ void SpecificWorker::gotoTarget(float dist) // método usado en complemento con 
   
   qDebug()<<"Agulo: "<< c <<", Distancia: "<<d;
 
-  if(d < 30 ) // sí distancia es menor a 30, llega al destino
+  if(d < 350 ) // sí distancia es menor a 30, llega al destino
    {
      qDebug()<<"destino alcanzado";
      differentialrobot_proxy->setSpeedBase(0,0);
@@ -198,7 +159,8 @@ void SpecificWorker::bugInit()
      checkAngle=false;
   }
   
-  if(bState.alpha<staticAngle)
+  //if(bState.alpha<staticAngle) // hasta que obstacle sea falso
+  if(obstacle()==true)
     differentialrobot_proxy->setSpeedBase(50, 0.6); // gira a la derecha
   else
   {
@@ -219,7 +181,7 @@ bool SpecificWorker::obstacle()
 	}) ;  //sort laser data from small to large distances using a lambda function.
 
     if( ldata[12].dist < MAX_ADVANCE){ 
-      //qDebug()<<"  OBSTACLE TRUE";
+      
       return true;
       
     }else
@@ -240,7 +202,6 @@ bool SpecificWorker::secondDist()
 	}) ;  //sort laser data from small to large distances using a lambda function.
 
     if( ldata[12].dist < THRESHOLD){ 
-      //qDebug()<<"  OBSTACLE TRUE";
       return true;
       
     }else

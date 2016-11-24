@@ -64,7 +64,8 @@ void SpecificWorker::compute()
 	  {
 	    differentialrobot_proxy->stopBase();
 	    gotopoint_proxy->go(" ", tag.getPose().x(), tag.getPose().z(), 0);
-	    qDebug() << "   IMAGEN   VISTA:  ";
+	    qDebug() << "   IMAGEN   VISTA:  "<<current;
+	    qDebug() << "Me llego x: "<<  tag.getPose().x()<<", z: "<< tag.getPose().z();
 	    state = State::WAIT;
 	  }
 	  else{
@@ -76,8 +77,10 @@ void SpecificWorker::compute()
       case State::WAIT:
 	//differentialrobot_proxy->setSpeedBase(0, 0);
 	//qDebug() << "estoy en WAIT";
-	  if (gotopoint_proxy->atTarget() == true)
+	  if (gotopoint_proxy->atTarget() == true )
 	  {
+	    
+	    qDebug()<<"      LLEGO";
 	    differentialrobot_proxy->stopBase();
 	    current++%4;
 	    state = State::SEARCH;
@@ -95,10 +98,10 @@ void SpecificWorker::compute()
 
 void SpecificWorker::newAprilTag(const tagsList &tags)
 {
-  qDebug() << "Me llego "<< tags[0].id << tags[0].tx << tags[0].tz;
+  //qDebug() << "Me llego "<< tags[0].id << tags[0].tx << tags[0].tz;
    
   tag.copy(tags[0].tx, tags[0].tz, tags[0].id ); 
-  tag.print();
+  //tag.print();
 }
 
 
