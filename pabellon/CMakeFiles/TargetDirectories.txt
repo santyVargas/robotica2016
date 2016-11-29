@@ -1,0 +1,3 @@
+/home/aldo/robocomp/components/robotica2016/supervisorP/CMakeFiles/edit_cache.dir
+/home/aldo/robocomp/components/robotica2016/supervisorP/CMakeFiles/rebuild_cache.dir
+/home/aldo/robocomp/components/robotica2016/supervisorP/CMakeFiles/ui_mainUI.dir
