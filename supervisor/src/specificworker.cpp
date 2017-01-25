@@ -60,16 +60,16 @@ void SpecificWorker::compute()
    {
      case State::SEARCH:
   
-	  if( tag.getId() == current)
+	  if( tag.getId() == current) // si ve el onjetivo correspomdiente
 	  {
-	    differentialrobot_proxy->stopBase();
-	    gotopoint_proxy->go(" ", tag.getPose().x(), tag.getPose().z(), 0);
+	    differentialrobot_proxy->stopBase(); // detener robot
+	    gotopoint_proxy->go(" ", tag.getPose().x(), tag.getPose().z(), 0); // avanza
 	    qDebug() << "   IMAGEN   VISTA:  "<<current;
 	    qDebug() << "Me llego x: "<<  tag.getPose().x()<<", z: "<< tag.getPose().z();
-	    state = State::WAIT;
+	    state = State::WAIT; // cambio de estado
 	  }
 	  else{
-	     differentialrobot_proxy->setSpeedBase(0, .3);
+	     differentialrobot_proxy->setSpeedBase(0, .3); // girar
 	  }
 	 
 	  break;
@@ -82,8 +82,8 @@ void SpecificWorker::compute()
 	    
 	    qDebug()<<"      LLEGO";
 	    differentialrobot_proxy->stopBase();
-	    current++%4;
-	    state = State::SEARCH;
+	    current++%4; // cambia objetivo actual al siguiente
+	    state = State::SEARCH; // vuelve a buscar
 	  }
 	  
 	   break;

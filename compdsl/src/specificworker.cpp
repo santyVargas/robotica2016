@@ -36,12 +36,17 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-  try{
-  state=State::INIT;
-  innermodel = new InnerModel("/home/robocomp/robocomp/files/innermodel/simpleworld.xml");
-  }catch(exception){ qDebug()<<"Error en 'setParams'"; }
-	timer.start(Period);
-	return true;
+  try
+  {
+    state=State::INIT;
+    innermodel = new InnerModel("/home/robocomp/robocomp/files/innermodel/simpleworld.xml");
+  }catch(exception)
+  { 
+    qDebug()<<"Error en 'setParams'"; 
+    
+  }
+    timer.start(Period);
+    return true;
 }
 
 void SpecificWorker::compute()
@@ -49,7 +54,8 @@ void SpecificWorker::compute()
   /*** Implementación del componente InnerModel ***
    ** (código realizado en clase) no borrar **/
   
-  try{
+  try
+  {
    differentialrobot_proxy->getBaseState(bState);
 
    innermodel->updateTransformValues("base",bState.x,0,bState.z,0,bState.alpha,0);
@@ -57,12 +63,14 @@ void SpecificWorker::compute()
    float dist = ldata[10].dist;
    QVec ini;
    
-   if(target.isActive()){
+   if(target.isActive())
+   {
      
      switch(state)
      {
        case State::INIT:
-	 if ( target.isActive() ){
+	 if ( target.isActive() )
+	 {
 	   qDebug() << "DE INIT a GOTO";
 	   state = State::GOTO;
 	 }
@@ -87,16 +95,13 @@ void SpecificWorker::compute()
   
 }
 
-
-
-
 void SpecificWorker::gotoTarget(float dist) // método usado en complemento con InnerModel, No cambiar
 {
   QVec tr = innermodel->transform("base",target.getPose(),"world"); // uso del método transform tomando la posición del Target
   float c=atan2(tr.x(),tr.z()); // calculo del angulo
   float d=tr.norm2(); // calculo de la distancia
   
-  qDebug()<<"Agulo: "<< c <<", Distancia: "<<d;
+  //qDebug()<<"Agulo: "<< c <<", Distancia: "<<d;
 
   if(d < 350 ) // sí distancia es menor a 30, llega al destino
    {
@@ -129,6 +134,7 @@ void SpecificWorker::gotoTarget(float dist) // método usado en complemento con 
  
 void SpecificWorker::bug()
 { 
+  qDebug()<<"BUG";
   
   if(targetAtSight()==true){
     state = State::GOTO;
@@ -137,7 +143,6 @@ void SpecificWorker::bug()
   
   if(secondDist()==true)
   {
-    differentialrobot_proxy->setSpeedBase(0, 0);
     state=State::BUGINIT;
     return;
   }
@@ -146,25 +151,26 @@ void SpecificWorker::bug()
 
 void SpecificWorker::bugInit()
 { 
-  
+  qDebug()<<"BUG INIT";
   if(targetAtSight()==true){
     state = State::GOTO;
     qDebug()<<"Objetivo visible";
   }
   
-  
   if(checkAngle)
   {
-     staticAngle = bState.alpha + 1.5707;//1.5707;//30 en radianes
+     staticAngle = bState.alpha + 1.5707;
      checkAngle=false;
   }
-  
+
   //if(bState.alpha<staticAngle) // hasta que obstacle sea falso
+  //if(bState.alpha<staticAngle)
+  
   if(obstacle()==true)
     differentialrobot_proxy->setSpeedBase(50, 0.6); // gira a la derecha
   else
   {
-    differentialrobot_proxy->setSpeedBase(0, 0);
+    //differentialrobot_proxy->setSpeedBase(0, 0);
     state=State::BUG;
   }
 }
@@ -187,7 +193,7 @@ bool SpecificWorker::obstacle()
     }else
       return false;
     }catch(exception){}
-  
+
 }
 
 bool SpecificWorker::secondDist()
@@ -203,11 +209,9 @@ bool SpecificWorker::secondDist()
 
     if( ldata[12].dist < THRESHOLD){ 
       return true;
-      
     }else
       return false;
     }catch(exception){}
-  
 }
 
 
@@ -248,9 +252,7 @@ bool SpecificWorker::targetAtSight() // hacemos funcionar este método y creo ya
 		if( poly.containsPoint(p , Qt::OddEvenFill) == false)
 			return false;
 	}
-	return true;
-  
-  
+	return true; 
 }
 
 void SpecificWorker::setPick(const Pick &myPick)
@@ -273,12 +275,3 @@ void SpecificWorker::go(const string& nodo, const float x, const float y, const 
   state= State::INIT;
 }
 
-void SpecificWorker::stop()
-{
-
-}
-
-void SpecificWorker::turn(const float speed)
-{
-
-}

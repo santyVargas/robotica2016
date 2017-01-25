@@ -91,7 +91,7 @@ private:
     pose.resize(3);
     pose[0]=x;
     pose[1]=0;
-    pose[2]=-z;
+    pose[2]=z;
   }
   
   bool isActive()

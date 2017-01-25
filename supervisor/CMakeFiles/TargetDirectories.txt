@@ -1,0 +1,14 @@
+/home/santy/robocomp/components/robotica2016/supervisor/CMakeFiles/install.dir
+/home/santy/robocomp/components/robotica2016/supervisor/CMakeFiles/list_install_components.dir
+/home/santy/robocomp/components/robotica2016/supervisor/CMakeFiles/install/strip.dir
+/home/santy/robocomp/components/robotica2016/supervisor/CMakeFiles/install/local.dir
+/home/santy/robocomp/components/robotica2016/supervisor/CMakeFiles/rebuild_cache.dir
+/home/santy/robocomp/components/robotica2016/supervisor/CMakeFiles/edit_cache.dir
+/home/santy/robocomp/components/robotica2016/supervisor/src/CMakeFiles/install.dir
+/home/santy/robocomp/components/robotica2016/supervisor/src/CMakeFiles/list_install_components.dir
+/home/santy/robocomp/components/robotica2016/supervisor/src/CMakeFiles/rebuild_cache.dir
+/home/santy/robocomp/components/robotica2016/supervisor/src/CMakeFiles/Supervisor.dir
+/home/santy/robocomp/components/robotica2016/supervisor/src/CMakeFiles/install/strip.dir
+/home/santy/robocomp/components/robotica2016/supervisor/src/CMakeFiles/install/local.dir
+/home/santy/robocomp/components/robotica2016/supervisor/src/CMakeFiles/edit_cache.dir
+/home/santy/robocomp/components/robotica2016/supervisor/src/CMakeFiles/Supervisor_automoc.dir

@@ -1,0 +1,3 @@
+/home/santy/robocomp/components/robotica2016/pabellon/CMakeFiles/edit_cache.dir
+/home/santy/robocomp/components/robotica2016/pabellon/CMakeFiles/rebuild_cache.dir
+/home/santy/robocomp/components/robotica2016/pabellon/CMakeFiles/ui_mainUI.dir
